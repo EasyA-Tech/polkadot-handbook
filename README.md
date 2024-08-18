@@ -50,7 +50,6 @@ Key tools and environments for Polkadot:
 
 - [Substrate](https://substrate.dev/) - Blockchain development framework used to build parachains for Polkadot.
 - [Polkadot-JS API](https://polkadot.js.org/docs/api) - JavaScript library for interacting with Polkadot nodes.
-- [Parity Signer](https://www.parity.io/signer/) - Turns your mobile device into a hardware wallet for Polkadot.
 
 ## Smart Contracts
 
@@ -64,7 +63,6 @@ How to write and deploy smart contracts on Polkadot:
 Going into the network level:
 
 - [Telemetry](https://telemetry.polkadot.io/) - Real-time visualization of nodes on the Polkadot network.
-- [Polkascan](https://polkascan.io/) - Multi-chain block explorer and analytics for Polkadot.
 - [Subscan](https://www.subscan.io/) - Multi-network explorer for Substrate-based chains, including Polkadot.
 
 ## Ecosystem Projects
@@ -82,7 +80,7 @@ Cool projects built on Polkadot:
 Extra stuff:
 
 - [Polkadot Blog](https://polkadot.network/blog/) - Official blog with updates, insights, and deep dives into Polkadot and ecosystem.
-- [Polkadot GitHub](https://github.com/paritytech/polkadot) - Official GitHub repository for Polkadot, containing the source code and development history.
+- [Polkadot SDK GitHub](https://github.com/paritytech/polkadot-sdk) - Official GitHub repository for Polkadot SDK.
 
 ## Handy Code Snippets
 
