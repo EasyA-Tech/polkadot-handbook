@@ -56,7 +56,8 @@ Key tools and environments for Polkadot:
 How to write and deploy smart contracts on Polkadot:
 
 - [ink!](https://github.com/paritytech/ink) - Rust-based smart contract language for Substrate chains in the Polkadot ecosystem.
-- [Contracts Pallet](https://github.com/paritytech/substrate/tree/master/frame/contracts) - A module for executing WebAssembly smart contracts on Substrate.
+
+Technically you can't (yet, see Plaza developments) deploy smart contracts on Polkadot directly. You need to deploy onto a parachain that supports smart contract execution (e.g. Astar, Acala, Moonbeam etc). Some of those parachains (e.g. Astar, Moonbeam) support EVM smart contracts, so you can also write them in Solidity (no ink! needed). 
 
 ## Polkadot Network
 
