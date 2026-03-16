@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFT Marketplace</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.5.2/web3.min.js"></script>
+</head>
+<body>
+    <h1>Welcome to the NFT Marketplace</h1>
+    <div>
+        <input type="file" id="nftFile" />
+        <input type="number" id="nftPrice" placeholder="Price in ETH" />
+        <button onclick="mintNFT()">Mint NFT</button>
+    </div>
+    <div>
+        <h2>Your NFTs</h2>
+        <ul id="nftList"></ul>
+    </div>
+
+    <script>
+        const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
+        const nftMarketplaceAddress = "0xYourContractAddressHere";
+        const nftMarketplaceABI = [ /* Your contract ABI here */ ];
+        const nftMarketplace = new web3.eth.Contract(nftMarketplaceABI, nftMarketplaceAddress);
+
+        async function mintNFT() {
+            const accounts = await web3.eth.getAccounts();
+            const nftFile = document.getElementById("nftFile").files[0];
+            const nftPrice = document.getElementById("nftPrice").value;
+
+            // Assuming you have a file upload process here
+            const uri = "https://example.com/nft_uri";
+
+            nftMarketplace.methods.mint(uri, web3.utils.toWei(nftPrice, "ether")).send({ from: accounts[0] });
+        }
+
+        async function loadNFTs() {
+            const accounts = await web3.eth.getAccounts();
+            const userNFTs = await nftMarketplace.methods.userNFTs(accounts[0]).call();
+            const nftList = document.getElementById("nftList");
+            nftList.innerHTML = "";
+            userNFTs.forEach(tokenId => {
+                const nftItem = document.createElement("li");
+                nftItem.innerText = `NFT ID: ${tokenId}`;
+                nftList.appendChild(nftItem);
+            });
+        }
+
+        loadNFTs();
+    </script>
+</body>
+</html>
