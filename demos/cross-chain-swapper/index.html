@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polkadot Cross-Chain Asset Swapper Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .balance-display, .transaction-history {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .transaction {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-left: 4px solid #3498db;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status.success {
+            background-color: #d5f5e3;
+            color: #27ae60;
+            border: 1px solid #27ae60;
+        }
+        .status.error {
+            background-color: #fadbd8;
+            color: #c0392b;
+            border: 1px solid #c0392b;
+        }
+        .status.info {
+            background-color: #d6eaf8;
+            color: #2980b9;
+            border: 1px solid #2980b9;
+        }
+        .paracains {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .paracain {
+            background: #ecf0f1;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Polkadot Cross-Chain Asset Swapper</h1>
+        <p>A demo showcasing cross-chain asset transfers using Polkadot's XCM (Cross-Consensus Messaging)</p>
+
+        <div class="status info" id="status">
+            🔗 Connected to Polkadot Relay Chain
+        </div>
+
+        <div class="paracains">
+            <div class="paracain">🔗 Acala (aUSD)</div>
+            <div class="paracain">🔗 Moonbeam (ETH)</div>
+            <div class="paracain">🔗 Astar (ASTR)</div>
+            <div class="paracain">🔗 Polkadot (DOT)</div>
+        </div>
+
+        <div class="form-group">
+            <label for="fromParachain">From Parachain:</label>
+            <select id="fromParachain">
+                <option value="acala">Acala (aUSD)</option>
+                <option value="moonbeam">Moonbeam (ETH)</option>
+                <option value="aster">Astar (ASTR)</option>
+                <option value="polkadot">Polkadot (DOT)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="toParachain">To Parachain:</label>
+            <select id="toParachain">
+                <option value="moonbeam">Moonbeam (ETH)</option>
+                <option value="acala">Acala (aUSD)</option>
+                <option value="aster">Astar (ASTR)</option>
+                <option value="polkadot">Polkadot (DOT)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" placeholder="Enter amount" min="0.01" step="0.01">
+        </div>
+
+        <button id="swapButton">Execute Cross-Chain Swap</button>
+
+        <div class="balance-display">
+            <h2>Your Balances</h2>
+            <div id="balances">
+                <p>Loading balances...</p>
+            </div>
+        </div>
+
+        <div class="transaction-history">
+            <h2>Transaction History</h2>
+            <div id="transactionHistory">
+                <p>No transactions yet</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>This is a demo implementation for educational purposes. In a real implementation,</p>
+            <p>this would use Polkadot-JS API to interact with actual parachains via XCM.</p>
+        </div>
+    </div>
+
+    <script>
+        // Simulated balances for demonstration
+        const balances = {
+            acala: 1000.50, // aUSD
+            moonbeam: 5.25, // ETH
+            aster: 2500.75, // ASTR
+            polkadot: 150.30 // DOT
+        };
+
+        const transactionHistory = [];
+
+        // Parachain display names and tokens
+        const parachainInfo = {
+            acala: { name: 'Acala', token: 'aUSD', icon: '🔗' },
+            moonbeam: { name: 'Moonbeam', token: 'ETH', icon: '🔗' },
+            aster: { name: 'Astar', token: 'ASTR', icon: '🔗' },
+            polkadot: { name: 'Polkadot', token: 'DOT', icon: '🔗' }
+        };
+
+        // DOM elements
+        const statusEl = document.getElementById('status');
+        const fromParachainEl = document.getElementById('fromParachain');
+        const toParachainEl = document.getElementById('toParachain');
+        const amountEl = document.getElementById('amount');
+        const swapButtonEl = document.getElementById('swapButton');
+        const balancesEl = document.getElementById('balances');
+        const transactionHistoryEl = document.getElementById('transactionHistory');
+
+        // Update balance display
+        function updateBalances() {
+            let html = '';
+            for (const [chain, amount] of Object.entries(balances)) {
+                const info = parachainInfo[chain];
+                html += `<p><strong>${info.icon} ${info.name} (${info.token}):</strong> ${amount.toFixed(2)}</p>`;
+            }
+            balancesEl.innerHTML = html;
+        }
+
+        // Add transaction to history
+        function addTransaction(type, fromChain, toChain, amount, status) {
+            const transaction = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleTimeString(),
+                type,
+                fromChain,
+                toChain,
+                amount,
+                status
+            };
+            transactionHistory.unshift(transaction);
+            // Keep only last 10 transactions
+            if (transactionHistory.length > 10) {
+                transactionHistory.pop();
+            }
+            updateTransactionHistory();
+        }
+
+        // Update transaction history display
+        function updateTransactionHistory() {
+            if (transactionHistory.length === 0) {
+                transactionHistoryEl.innerHTML = '<p>No transactions yet</p>';
+                return;
+            }
+
+            let html = '';
+            for (const tx of transactionHistory) {
+                const fromInfo = parachainInfo[tx.fromChain];
+                const toInfo = parachainInfo[tx.toChain];
+                let typeText = '';
+                if (tx.type === 'swap') {
+                    typeText = `Swapped ${tx.amount.toFixed(2)} ${fromInfo.token} for ${toInfo.token}`;
+                } else {
+                    typeText = `${tx.type} ${tx.amount.toFixed(2)} ${tx.fromChain === tx.toChain ? fromInfo.token : ''}`;
+                }
+
+                html += `
+                    <div class="transaction ${tx.status === 'success' ? 'success' : tx.status === 'error' ? 'error' : ''}">
+                        <strong>[${tx.timestamp}]</strong> ${typeText}
+                        <span class="status ${tx.status}" style="display: inline-block; margin-left: 10px; padding: 2px 8px; font-size: 12px;">
+                            ${tx.status === 'success' ? '✓ Success' : tx.status === 'error' ? '✗ Failed' : '⏳ Processing'}
+                        </span>
+                    </div>
+                `;
+            }
+            transactionHistoryEl.innerHTML = html;
+        }
+
+        // Simulate a cross-chain swap via XCM
+        async function executeSwap() {
+            const fromChain = fromParachainEl.value;
+            const toChain = toParachainEl.value;
+            const amount = parseFloat(amountEl.value);
+
+            // Validation
+            if (isNaN(amount) || amount <= 0) {
+                showStatus('Please enter a valid amount', 'error');
+                return;
+            }
+
+            if (fromChain === toChain) {
+                showStatus('Please select different parachains for swap', 'error');
+                return;
+            }
+
+            if (balances[fromChain] < amount) {
+                showStatus(`Insufficient balance in ${parachainInfo[fromChain].name}`, 'error');
+                return;
+            }
+
+            // Disable button during transaction
+            swapButtonEl.disabled = true;
+            swapButtonEl.textContent = 'Processing...';
+            showStatus('Initiating cross-chain transfer via XCM...', 'info');
+
+            try {
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                // Simulate potential failure (10% chance)
+                if (Math.random() < 0.1) {
+                    throw new Error('Network timeout - please try again');
+                }
+
+                // Execute the swap
+                balances[fromChain] -= amount;
+                // Simple 1:1 conversion for demo (not realistic)
+                const convertedAmount = amount;
+                balances[toChain] += convertedAmount;
+
+                // Record transaction
+                addTransaction('swap', fromChain, toChain, amount, 'success');
+
+                // Update UI
+                updateBalances();
+                showStatus(`Successfully swapped ${amount} ${parachainInfo[fromChain].token} for ${convertedAmount} ${parachainInfo[toChain].token} via XCM!`, 'success');
+
+            } catch (error) {
+                showStatus(`Swap failed: ${error.message}`, 'error');
+                addTransaction('swap', fromChain, toChain, amount, 'error');
+            } finally {
+                // Re-enable button
+                swapButtonEl.disabled = false;
+                swapButtonEl.textContent = 'Execute Cross-Chain Swap';
+                amountEl.value = ''; // Clear input
+            }
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+
+        // Event listeners
+        swapButtonEl.addEventListener('click', executeSwap);
+
+        // Prevent form submission if Enter is pressed
+        amountEl.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                executeSwap();
+            }
+        });
+
+        // Initialize
+        updateBalances();
+        updateTransactionHistory();
+        showStatus('Ready to execute cross-chain swaps', 'info');
+    </script>
+</body>
+</html>
